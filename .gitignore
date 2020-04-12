@@ -3,5 +3,7 @@
 */include/*
 */lib/*
 */.Python
+*/*.txt
+
 webscraping/downloads/*
 convert_png_pdf/*.pdf

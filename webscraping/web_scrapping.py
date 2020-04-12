@@ -7,16 +7,16 @@ import requests
 from bs4 import BeautifulSoup
 from fpdf import FPDF
 
-
-# TODO - Salvar num arquivo txt arquivos pdf que deram problema. Tal arquivo pode ser
-# útil no script que estou fazendo que ajusta arquivos png problemáticos
-# Capítulos que deram problema na geração do pdf: 224, 227, 229, 231.
+""""
+    If you want, that script able to use together with pngtopdf.py
+"""
 
 # TODO - Ler: https://www.scrapehero.com/how-to-prevent-getting-blacklisted-while-scraping/
 # Ler: https://automatetheboringstuff.com/2e/chapter12/
 # Ler: https://www.crummy.com/software/BeautifulSoup/
 
-def main():
+
+def main(chapter_start, chapter_end, generate_pdf_after_downloads):
     logging.basicConfig(level=logging.INFO)
     logging.info(datetime.datetime.now())
     base_path = "downloads/magi"
@@ -27,35 +27,34 @@ def main():
         pass
 
     # Lido 199 - 223
-    # A Baixar 240 - 369
+    # A Baixar 249 - 369
     url_manga = "https://unionleitor.top/leitor/Magi:_The_Labyrinth_of_Magic"
-    chapter_start = 224
-    chapter_end = 225
-    generate_pdf_after_downloads = True
     pdf = None
+    chapters_error_pdf = []
     for chapter in range(chapter_start, chapter_end):
         logging.info("Chapter %d started" % (chapter))
         logging.info(datetime.datetime.now())
 
         url_request = '%s/%d' % (url_manga, chapter)
         response = requests.get(url_request, stream=True, 
-            headers={'User-agent': 'Mozilla/5.0'})
+                                headers={'User-agent': 'Mozilla/5.0'})
         page = 0
         if response.status_code == 200:
             if generate_pdf_after_downloads:
-                pdf = FPDF(orientation = 'P', format='A4')
+                pdf = FPDF(orientation='P', format='A4')
             content = response.content
             soup = BeautifulSoup(content, features="html.parser")
             images = soup.find('div', attrs={'class':'col-sm-12 text-center'})
             for item in images.contents:
                 if item != "\n":
                     src = item.get("src")
-                    if src != "https://unionleitor.top/images/banner_scan.png" and \
-                        src!= "https://unionleitor.top/images/banner_forum.png":
+                    if must_ignored(src):
                         page += 1
-                        path_file_formated = download_image(base_path, src, chapter, page)
+                        path_file_formated = download_image(
+                            base_path, src, chapter, page)
                         try:
-                            if generate_pdf_after_downloads and path_file_formated:
+                            if generate_pdf_after_downloads and \
+                                path_file_formated:
                                 pdf.add_page()
                                 pdf.image(path_file_formated, w=185, h=237)
                         except RuntimeError as ex:
@@ -63,13 +62,13 @@ def main():
                                 added in the pdf file." % page)
                             logging.error("It's a link about page: %s" % src)
                             logging.error("It's the error message: %s" % ex.args[0])
-                            # TODO - salvar aqui o caminho no qual as imagens foram baixadas, mas o pdf deu problema
-                            # (base_path, chapter)
-
-            logging.info("PDF generation of chapter %d started" % (chapter))
-            if generate_pdf_after_downloads:
+                            chapters_error_pdf.append("%s\n" % path_file_formated)
+            if generate_pdf_after_downloads and len(chapters_error_pdf) <= 0:
+                logging.info("PDF generation of chapter %d started" % (chapter))
                 pdf.output("%s/%d.pdf" % (base_path, chapter), "F")
-            logging.info("PDF generation of chapter %d done" % (chapter))
+                logging.info("PDF generation of chapter %d done" % (chapter))
+            if len(chapters_error_pdf) > 0:
+                create_txt_about_errors(chapters_error_pdf)
             logging.info(datetime.datetime.now())
             logging.info("Chapter %d done" % (chapter))
         else:
@@ -81,7 +80,7 @@ def download_image(base_path, url_image, chapter, page):
     response = requests.get(url_image,
         stream=True, headers={'User-agent': 'Mozilla/5.0'})
     type_file = url_image[len(url_image) - 3:len(url_image)]
-    
+
     result = None
     try:
         url_formated = "%s/%s" % (base_path, chapter)
@@ -98,5 +97,22 @@ def download_image(base_path, url_image, chapter, page):
     return result
 
 
+def create_txt_about_errors(chapters_error_pdf):
+    txt_error = open("%s_error.txt" % datetime.datetime.now(), "w")
+    txt_error.writelines(chapters_error_pdf)
+    txt_error.close()
+
+
+def must_ignored(src):
+    result = src != "https://unionleitor.top/images/banner_scan.png" and \
+        src!= "https://unionleitor.top/images/banner_forum.png"
+    return result
+
+
 if __name__ == "__main__":
-    main()
+    chapter_start = input("What chapter would you like to start download: ")
+    chapter_end = input("What chapter would you like to end download: ")
+    generate_pdf_after_downloads = input("Would you like to create a pdf file\
+        for each chapter (this process is expensive) (y/n)")
+    main(int(chapter_start), int(chapter_end) + 1,
+        generate_pdf_after_downloads == "y")
