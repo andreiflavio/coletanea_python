@@ -8,9 +8,9 @@ from bs4 import BeautifulSoup
 from fpdf import FPDF
 
 
-# TODO - Resolver Issue #2 - Problema na geração do pdf do capítulo 224, 227, 229, 231.
-# Ao mexer com esta Issue, tratar diretamente a pasta onde estão salvos os arquivos.
-# Entender melhor o que seria interlacing
+# TODO - Salvar num arquivo txt arquivos pdf que deram problema. Tal arquivo pode ser
+# útil no script que estou fazendo que ajusta arquivos png problemáticos
+# Capítulos que deram problema na geração do pdf: 224, 227, 229, 231.
 
 # TODO - Ler: https://www.scrapehero.com/how-to-prevent-getting-blacklisted-while-scraping/
 # Ler: https://automatetheboringstuff.com/2e/chapter12/
@@ -26,7 +26,8 @@ def main():
     except:
         pass
 
-    # 199 - 369
+    # Lido 199 - 223
+    # A Baixar 240 - 369
     url_manga = "https://unionleitor.top/leitor/Magi:_The_Labyrinth_of_Magic"
     chapter_start = 224
     chapter_end = 225
@@ -62,6 +63,9 @@ def main():
                                 added in the pdf file." % page)
                             logging.error("It's a link about page: %s" % src)
                             logging.error("It's the error message: %s" % ex.args[0])
+                            # TODO - salvar aqui o caminho no qual as imagens foram baixadas, mas o pdf deu problema
+                            # (base_path, chapter)
+
             logging.info("PDF generation of chapter %d started" % (chapter))
             if generate_pdf_after_downloads:
                 pdf.output("%s/%d.pdf" % (base_path, chapter), "F")
@@ -75,7 +79,7 @@ def main():
 
 def download_image(base_path, url_image, chapter, page):
     response = requests.get(url_image,
-                stream=True, headers={'User-agent': 'Mozilla/5.0'})
+        stream=True, headers={'User-agent': 'Mozilla/5.0'})
     type_file = url_image[len(url_image) - 3:len(url_image)]
     
     result = None

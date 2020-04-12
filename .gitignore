@@ -1,10 +1,7 @@
-.vsconde
-/convert_png_pdf/bin/*
-/convert_png_pdf/include/*
-/convert_png_pdf/lib/*
-/convert_png_pdf/.Python
-/webscraping/bin/*
-/webscraping/include/*
-/webscraping/lib/*
-/webscraping/.Python
-/webscraping/downloads/*
+*/.vsconde/*
+*/bin/*
+*/include/*
+*/lib/*
+*/.Python
+webscraping/downloads/*
+convert_png_pdf/*.pdf
