@@ -7,6 +7,7 @@ from fpdf import FPDF
     This script depends on to install ImageMagick.
     http://www.imagemagick.org/script/download.php#macosx
 """
+# TODO - Criar testes unitários
 
 files_error = []
 pdf = FPDF(orientation='P', format='A4')

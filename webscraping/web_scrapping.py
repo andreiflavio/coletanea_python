@@ -14,12 +14,14 @@ from fpdf import FPDF
 # TODO - Ler: https://www.scrapehero.com/how-to-prevent-getting-blacklisted-while-scraping/
 # Ler: https://automatetheboringstuff.com/2e/chapter12/
 # Ler: https://www.crummy.com/software/BeautifulSoup/
+# Criar testes unitários
 
 
-def main(chapter_start, chapter_end, generate_pdf_after_downloads):
+def main(folder_to_save_images_downloaded,
+         chapter_start, chapter_end, generate_pdf_after_downloads):
     logging.basicConfig(level=logging.INFO)
     logging.info(datetime.datetime.now())
-    base_path = "downloads/magi"
+    base_path = folder_to_save_images_downloaded
 
     try:
         os.mkdir(base_path)
@@ -27,7 +29,7 @@ def main(chapter_start, chapter_end, generate_pdf_after_downloads):
         pass
 
     # Lido 199 - 223
-    # A Baixar 249 - 369
+    # A Baixar 255 - 369
     url_manga = "https://unionleitor.top/leitor/Magi:_The_Labyrinth_of_Magic"
     pdf = None
     chapters_error_pdf = []
@@ -110,9 +112,11 @@ def must_ignored(src):
 
 
 if __name__ == "__main__":
+    folder_to_save_images_downloaded = input("Where would you like to save images downloaded:")
     chapter_start = input("What chapter would you like to start download: ")
     chapter_end = input("What chapter would you like to end download: ")
     generate_pdf_after_downloads = input("Would you like to create a pdf file\
         for each chapter (this process is expensive) (y/n)")
-    main(int(chapter_start), int(chapter_end) + 1,
+    main(folder_to_save_images_downloaded,
+        int(chapter_start), int(chapter_end) + 1,
         generate_pdf_after_downloads == "y")
